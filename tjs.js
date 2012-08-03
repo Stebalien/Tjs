@@ -36,6 +36,7 @@ if (!Array.prototype.map) {
     "use strict";
 
     var registeredTags = {};
+    var registeredFilters = {};
 
     var trim = function(s) {
         return s.trim ? s.trim() : s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
@@ -175,13 +176,22 @@ if (!Array.prototype.map) {
             }
         },
         elements : {},
-        register : function(tags) {
+        registerTags : function(tags) {
             extend(registeredTags, tags);
         },
-        unregister : function() {
+        unregisterTags : function() {
             for (var i = 0; i < arguments.length; i++) {
                 var tag = arguments[i];
                 delete registeredTags[tag];
+            }
+        },
+        registerFilters : function(filters) {
+            extend(registeredFilters, filters);
+        },
+        unregisterFilters : function() {
+            for (var i = 0; i < arguments.length; i++) {
+                var filter = arguments[i];
+                delete registeredFilters[filter];
             }
         },
         lookup : function(context, name) {
@@ -238,9 +248,13 @@ if (!Array.prototype.map) {
             this.value = value;
         },
         exec: function(context) {
-            return this.value.replace(/{{(.*?)}}/g, function(match, name) {
-                var val = Tjs.lookup(context, trim(name));
-                return typeof(val) === "undefined" ? "" : val;
+            return this.value.replace(/{{\s*(.*?)\s*}}/g, function(match, contents) {
+                var pieces = contents.split(/\s*\|\s*/);
+                var val = Tjs.lookup(context, pieces[0]);
+                for (var i = 1; i < pieces.length; i++) {
+                    val = registeredFilters[pieces[i]](val, context);
+                }
+                return val || "";
             });
         }
     });
@@ -403,7 +417,7 @@ if (!Array.prototype.map) {
         }
     });
 
-    Tjs.register({
+    Tjs.registerTags({
         "if": If,
         "else": Else,
         "for": For,
@@ -413,5 +427,38 @@ if (!Array.prototype.map) {
         "include": Include
     });
 
+    var escapeChars = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quote;'
+    };
+
+    var escapeRegex = (function() {
+        var str = "[";
+        for (var key in escapeChars) {
+            str += "\\x" + key.charCodeAt(0).toString(16);
+        }
+        str += "]";
+        return new RegExp(str, "g");
+    })();
+
+    var escapeReplaceFn = function(ch) {
+        console.log(ch);
+        return escapeChars[ch];
+    };
+
+
+    Tjs.registerFilters({
+        "escape": function(o) {
+            if (typeof(o) !== "string") return o;
+            if (!o._safe) {
+                o = o.replace(escapeRegex, escapeReplaceFn);
+                o._safe = true;
+            }
+            return o;
+        }
+    });
     window.Tjs = Tjs;
 })();
