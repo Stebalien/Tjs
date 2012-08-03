@@ -484,12 +484,7 @@ if (!Array.prototype.map) {
 
     Tjs.registerFilters({
         "escape": function(o) {
-            if (typeof(o) !== "string") return o;
-            if (!o._safe) {
-                o = o.replace(escapeRegex, escapeReplaceFn);
-                o._safe = true;
-            }
-            return o;
+            return o.replace(escapeRegex, escapeReplaceFn);
         }
     });
     window.Tjs = Tjs;
