@@ -262,16 +262,16 @@ if (!Array.prototype.map) {
     // A tag that can contain other elements.
     var Block = Tjs.Block = Tag.extend({
         exec: function(context) {
-            return this.execChildren(context, this.firstChild);
+            return this.execChildren(clone(context));
         },
         execChildren : function(context, first, last) {
             var text = "";
             if (last) {
-                for (var child = first; child && child != last; child = child.next) {
+                for (var child = (first || this.firstChild); child && child != last; child = child.next) {
                     text += child.exec(context);
                 }
             } else {
-                for (var child = first; child; child = child.next) {
+                for (var child = (first || this.firstChild); child; child = child.next) {
                     text += child.exec(context);
                 }
             }
