@@ -322,29 +322,43 @@ if (!Array.prototype.map) {
     }, { frame: "if" });
 
     var For = Tjs.elements.For = Block.extend({
-        initialize: function(varName, iterName) {
-            this.varName = varName;
-            this.iterName = iterName;
+        initialize: function() {
+            var i = Array.prototype.indexOf.call(arguments, 'in');
+            switch(i) {
+                case 1:
+                    if (arguments.length != 3) throw new Error("Invalid for arguments.");
+                    this.valueName = arguments[0];
+                    this.iterName = arguments[2];
+                    break;
+                case 2:
+                    if (arguments.length != 4) throw new Error("Invalid for arguments.");
+                    this.valueName = arguments[0];
+                    this.keyName  = arguments[1];
+                    this.iterName = arguments[3];
+                    break;
+                default:
+                    throw new Error("Invalid for arguments.");
+            }
         },
-        registerEmpty(tag) {
+        registerEmpty : function(tag) {
             this.emptyTag = tag;
         },
         exec: function(context) {
-            var array = Tjs.lookup(context, this.iterName);
-            if (array.length === 0) {
+            var iterable = Tjs.lookup(context, this.iterName);
+            if (!iterable) {
                 return this.execChildren(context, this.empytTag);
             }
-                
             var text = "";
-            for (var index = 0; index < array.length; index++) {
+            var index = 0;
+            for (var key in iterable) {
+                var value = iterable[key];
                 context = clone(context);
-                context.forloop = {
-                    index: index,
-                    first: index === 0,
-                    last: index === array.length-1
-                }
-                context[this.varName] = array[index];
+                context.forloop = {};
+                context.forloop.index = index;
+                context[this.valueName] = iterable[key];
+                if (key) context[this.keyName] = key;
                 text += this.execChildren(context, this.firstChild, this.emptyTag);
+                index++;
             }
             return text;
         },
