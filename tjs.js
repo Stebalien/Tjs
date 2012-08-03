@@ -428,6 +428,24 @@ if (!Array.prototype.map) {
         }
     });
 
+    var Let = Tjs.elements.Let = Block.extend({
+        exec: function(context) {
+            var str = "{" + this.execChildren(context) + "}";
+            extend(context, JSON.parse(str));
+            return "";
+        }
+    });
+
+    var Json = Tjs.elements.Json = Tag.extend({
+        initialize: function(varName) {
+            this.varName = varName;
+        },
+        exec: function(context) {
+            return JSON.stringify(Tjs.lookup(context, this.varName));
+        }
+    });
+
+
     Tjs.registerTags({
         "if": If,
         "else": Else,
@@ -435,7 +453,10 @@ if (!Array.prototype.map) {
         "case": Case,
         "switch": Switch,
         "default": Default,
-        "include": Include
+        "include": Include,
+        "let": Let,
+        "block": Block,
+        "json": Json
     });
 
     var escapeChars = {
