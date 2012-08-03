@@ -23,7 +23,7 @@ var tests = {
         assertEquals(t({test: false}), "abce");
     },
     testFor: function() {
-        var s = "abc{% for a as %}{{a}}{% if test %}this{%endif%}{%endfor%}";
+        var s = "abc{% for a in as %}{{a}}{% if test %}this{%endif%}{%endfor%}";
         var t = Tjs.template(s);
         assertEquals(t({as: [1,2,3]}), "abc123");
     },
