@@ -223,7 +223,7 @@ if (!Array.prototype.map) {
 
     // The basic element.
 
-    var Element = Tjs.elements.Element = function(parentElement, args) {
+    var Element = Tjs.Element = function(parentElement, args) {
         this.parentElement = parentElement;
         this.initialize.apply(this, args);
     };
@@ -232,9 +232,6 @@ if (!Array.prototype.map) {
         child.extend = this.extend;
         return child;
     }
-        
-        
-
     Element.prototype = {
         // Called when the element is created
         initialize: function() {},
@@ -243,7 +240,7 @@ if (!Array.prototype.map) {
     };
 
     // The text element (...{{...}}...)
-    var Text = Tjs.elements.Text = Element.extend({
+    var Text = Tjs.Text = Element.extend({
         initialize: function(value) {
             this.value = value;
         },
@@ -260,10 +257,10 @@ if (!Array.prototype.map) {
     });
 
     // The tag element ({%...%})
-    var Tag = Tjs.elements.Tag = Element.extend({ });
+    var Tag = Tjs.Tag = Element.extend({ });
 
     // A tag that can contain other elements.
-    var Block = Tjs.elements.Block = Tag.extend({ 
+    var Block = Tjs.Block = Tag.extend({
         exec: function(context) {
             return this.execChildren(context, this.firstChild);
         },
